@@ -15,10 +15,10 @@ function buscarPeliculas(req, res) {
         sql += ` AND titulo LIKE "%${titulo}%"`;
     }
     if(anio) {
-        sql += ` AND anio = ${anio}`;
+        sql += ` AND anio = `+ anio;
     }
     if(genero) {
-        sql += ` AND genero_id = ${genero}`;
+        sql += ` AND genero_id = ` + genero;
     }
     //orden de las peliculas
     switch(orden) {
@@ -115,11 +115,15 @@ function buscarRecomendaciones(req, res) {
   if(genero){
       filtro ='join genero on pelicula.genero_id = genero.id and genero.nombre = ' + genero;
   }
-
+//si elige un estreno
   if(anio_inicio && anio_fin){
       filtro ='where fecha_lanzamiento >= ' + anio_inicio + ' and fecha_lanzamiento <= ' + anio_fin;  
   }
-  
+//si elige un clasico
+  if(anio_inicio && anio_fin){
+    filtro ='where fecha_lanzamiento < ' + anio_fin;
+}
+ // si elige por puntuación 
   if(puntuacion){
      filtro =' where puntuacion >=' + puntuacion;
     
