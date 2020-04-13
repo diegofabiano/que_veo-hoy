@@ -63,50 +63,43 @@ function buscarGeneros(req, res) {
 
 //funcion que obtiene la info de una pelicula segun su id
 function buscarPeliculaPorID(req, res) {
-  let id = req.params.id;
-    let sqlPelicula = `SELECT * FROM pelicula INNER JOIN genero ON pelicula.genero_id = genero.id WHERE pelicula.id = ${id}`; // Query para obtener datos de película y el género. //
+    var id = req.params.id;
+    var sqlPelicula = 'SELECT * FROM pelicula WHERE id = ' + id;
+    var sqlActores = 'SELECT nombre FROM actor JOIN actor_pelicula ON actor.id = actor_pelicula.actor_id JOIN pelicula ON pelicula.id = actor_pelicula.pelicula_id WHERE pelicula.id = ' + id;
+    var sqlGenero = 'SELECT nombre FROM genero JOIN pelicula ON genero.id = pelicula.genero_id WHERE pelicula.id = ' + id;
+    
+    //consulta que obtiene la info de la tabla pelicula
+    con.query(sqlPelicula, function(error, result, fields) {
+        if (error) {
+            console.log('Hubo un error en la consulta1', error.message);
+            return res.status(404).send('Hubo un error en la consulta');
+        };
+        var respuesta = {
+            'pelicula': result[0],
+            'actores': '',
+            'genero': ''
+        };
 
-        con.query(sqlPelicula, (error, resultado, fields) => {
-            // Se chequea que el id ingresado sea un número. //
-            if(typeof Number(id) !== 'number' || isNaN(Number(id))){
-                console.log("El id debe ser un número.", error.message);
-                return res.status(400).send("El id debe ser un número.");
+        //consulta que obtiene los nombres de los actores
+        con.query(sqlActores, function(errorAct, resultAct, fieldsAct) {
+            if (errorAct) {
+                console.log('Hubo un error en la consulta2', error.message);
+                return res.status(404).send('Hubo un error en la consulta');
             };
-
-            if (error) {
-                console.log("Hubo un error en la consulta.", error.message);
-                return res.status(404).send("Hubo un error en la consulta.");
-            }
-
-            if (resultado.length == 0) {
-                console.log("No se encontró ninguna película con ese id.")
-                return res.status(404).send("No se encontró ninguna película con ese id.");
-            }
-
-                // Si no hay ningún error, se crea el objeto respuesta. //
-                let response = {
-                    pelicula: resultado[0],
-                    genero: resultado[0].nombre,
-                    actores: ""
-                };
-
-
-    let sqlActores = `SELECT actor.nombre FROM pelicula INNER JOIN actor_pelicula ON pelicula.id=actor_pelicula.pelicula_id INNER JOIN actor ON actor.id = actor_pelicula.actor_id WHERE pelicula.id = ${id}`; // Query para obtener los actores de la película correspondiente. //
-
-        con.query(sqlActores, (error, resultadoActores, fields) => {
-            if (error) {
-                console.log("Hubo un error en la consulta.", error.message);
-                return res.status(404).send("Hubo un error en la consulta.");
+            respuesta.actores = resultAct;
+        //consulta que obtiene el genero
+        con.query(sqlGenero, function(errorGen, resultGen, fieldsGen) {
+            if (errorGen) {
+                console.log('Hubo un error en la consulta', error.message);
+                return res.status(404).send('Hubo un error en la consulta');
             };
-
-                // Se agregan los actores al objeto respuesta. //
-                response.actores = resultadoActores;
-
-                // Se envía la respuesta. //
-                res.send(JSON.stringify(response));
+            respuesta.genero = resultGen[0].nombre;                
+            res.send(JSON.stringify(respuesta));
         });
-    })   
-};
+    });
+});
+}
+
 
 
 // funcion para recomendar peliculas
