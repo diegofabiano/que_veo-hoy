@@ -16,8 +16,8 @@ app.use(bodyParser.json());
 
 app.get("/peliculas?", controlador.buscarPeliculas);
 app.get("/generos", controlador.buscarGeneros);
-app.get("/peliculas/:id", controlador.buscarPeliculaPorID);
 app.get("/peliculas/recomendacion", controlador.buscarRecomendaciones);
+app.get("/peliculas/:id", controlador.buscarPeliculaPorID);
 
 
 
